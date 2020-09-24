@@ -19,19 +19,21 @@ class DICOM_Generator(Sequence):
 
     def __getitem__(self, index):
     
-        if dicom_folder == "None":
+        if dicom_folder == None:
             folders = os.path.listdir(self.root_path)[-1] #-1 to remove thumbs.db in windows 10
             self.batch_size = self.batch_size/len(folders)
             index = self.index[index * self.batch_size:(index + 1) * self.batch_size]
             dcm_batch_files = os.path.join(self.root_path, folders[0])
             batch = [dcm_batch_files[k] for k in index]
-            X, Y = self.get_batch(batch, folders)
+            self.folders = folders
+            X, Y = self.get_batch(batch)
             return X, Y
     
         else:
             index = self.index[index * self.batch_size:(index + 1) * self.batch_size]
             dcm_batch_files = os.path.join(self.root_path, self.dicom_folder)
             batch = [dcm_batch_files[k] for k in index]
+            self.folders = None
             X, Y = self.get_batch(batch)
             return X, Y
 
@@ -41,32 +43,44 @@ class DICOM_Generator(Sequence):
             np.random.shuffle(self.index)
 
     def load_dicoms(self, batch):
-        dcm_files = [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.dcm")]
+        if self.folders != None:
+            if not _2D:
+                dcm_files = [pydicom.read(dcm) for dcm in glob.glob(batch+"\*\*.dcm")]
+            else:
+                dcm_files = [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.dcm")]   
+        else:
+            dcm_files = []
+            for i, folder in enumrate(self.folders):
+                files = [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.dcm")]
+                dcm_files.append(files)
+        
         
     def load_dicoms_labels(self, batch):
-        if not _2D:
-            dcm_labels = [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.png")] + [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.jpg")] + [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.jpeg")]
-        
+        if self.folders != None:
+            if not _2D:
+                dcm_labels = [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.png")] + [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.jpg")] + [pydicom.read(dcm) for dcm in glob.glob(batch+"\*.jpeg")]
+            else:
+                pass
+                
         else:
-            batch
+            pass
             
-    def get_batch(self, batch, foldes=None):
         
-        if folder != "None":
+            
+    def get_batch(self, batch):
+        
+        if self.folders != None:
             dcm_files = []
             dcm_labels = []
-            for i, folder in enumrate(folders):
-                files = load_dicoms(batch.replace(folders[0], folders[i]))
+            for i, folder in enumrate(self.folders):
+                files = load_dicoms(batch.replace(self.folders[0], folder))
                 labels = load_dicom_labels(batch)
                 dcm_files.append(files)
                 dcm_labels.append(labels)
         else:
             dcm_files = load_dicoms(batch)
-            
-        if dicom_labels == "None":
-            pass
-        else:
             dcm_labels = load_dicom_labels(batch)
+            
             
         
         for i, id in enumerate(batch):
