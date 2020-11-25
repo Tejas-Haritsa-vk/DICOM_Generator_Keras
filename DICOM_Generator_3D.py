@@ -1,5 +1,6 @@
 class DICOM_Generator(tf.keras.utils.Sequence):
-    def __init__(self, root_path, dicom_folder, dicom_labels, input_shape=(512, 512), batch_size=16, num_classes=None, shuffle=True, preprocess_fun=None):
+    def __init__(self, root_path, dicom_folder, dicom_labels, input_shape=(256, 512, 512), batch_size=16, num_classes=None, shuffle=True, preprocess_fun=None):
+        '''Note: Input_shape takes 3 values: number_of_slices x image_height x image_width'''
         self.root_path = root_path
         self.dicom_folder_name = dicom_folder
         self.mask_folder_name = dicom_labels
