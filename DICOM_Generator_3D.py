@@ -1,4 +1,10 @@
-class DICOM_Generator(tf.keras.utils.Sequence):
+import numpy as np
+import os
+import glob
+from keras.utils import Sequence
+from DICOM_Utilities import *
+
+class DICOM_Generator(Sequence):
     def __init__(self, root_path, dicom_folder, dicom_labels, input_shape=(256, 512, 512), batch_size=16, num_classes=None, shuffle=True, preprocess_fun=None):
         '''Note: Input_shape takes 3 values: number_of_slices x image_height x image_width'''
         self.root_path = root_path
@@ -12,15 +18,18 @@ class DICOM_Generator(tf.keras.utils.Sequence):
         self.on_epoch_end()
 
     def __len__(self):
-        return len(self.indices) // self.batch_size)
+        return len(self.indices) // self.batch_size
 
     def __getitem__(self, index):
         return self.get_batch()
 
     def on_epoch_end(self):
-        self.index = np.arange(len(self.indices))
-        if self.shuffle == True:
-            np.random.shuffle(self.index)
+        self.files = glob.glob(self.rooth_path + "/" + self.dicom_folder_name + "/*")
+        self.files = [os.path.join(self.root_path, file) for file in self.files]
+        self.files = np.random.choice(self.files, self.batch_size)
+        if self.shuffle:
+            self.files = np.random.choice(self.siles, self.batch_size)
+            np.random.shuffle(self.files)
 
     def load_dicom_masks(self, mask_file, dcm_file, pkg):
         mask_file = glob.glob(mask_file+"\*.dcm")[0]
@@ -53,8 +62,8 @@ class DICOM_Generator(tf.keras.utils.Sequence):
             dcm_masks = np.array(dcm_masks)
 
             #rescaling HU values to 0-1
-            dcm_file = (dcm_file+abs(dcm_file.min()))*(1/(abs(dcm_file.min())+dcm_file.max())))
-            dcm_masks = (dcm_masks+abs(dcm_masks.min()))*(1/(abs(dcm_masks.min())+dcm_masks.max())))
+            dcm_file = (dcm_file+abs(dcm_file.min()))*(1/(abs(dcm_file.min())+dcm_file.max()))
+            dcm_masks = (dcm_masks+abs(dcm_masks.min()))*(1/(abs(dcm_masks.min())+dcm_masks.max()))
 
             batch_dicoms+=[dcm_file]
             batch_labels+=[dcm_masks]
