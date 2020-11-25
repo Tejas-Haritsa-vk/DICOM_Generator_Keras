@@ -1,6 +1,6 @@
 #load dicom from given path
 def load_dicom(path, input_shape):
-'''Input:
+      '''Input:
       path: path to dicom folder
       input_shape: number_of_slices x height x width'''
       slices = [pydicom.dcmread(path + "/" + slice) for slice in os.listdir(path)]
@@ -15,7 +15,7 @@ def load_dicom(path, input_shape):
             slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
       except:
             slice_thickness = np.abs(slices[0].SliceLocation - slices[1].SliceLocation)
-   
+
       for slice in slices:
             slice.SliceThickness = slice_thickness
 
@@ -31,7 +31,7 @@ def load_dicom(path, input_shape):
       pkg = [z, pos_r, pos_c, spacing_r, spacing_c, hu_pix.shape]
 
       return hu_pix_resampled, spacing, pkg
-                        
+
                         
 def resample(image, input_shape, scan=False, new_spacing=[1,1,1]):
       if scan:
