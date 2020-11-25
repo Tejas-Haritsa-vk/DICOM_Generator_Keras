@@ -33,8 +33,9 @@ def load_dicom(path, input_shape):
       return hu_pix_resampled, spacing, pkg
                         
                         
-def resample(image, scan, input_shape, new_spacing=[1,1,1]):
-      spacing = np.array([scan[0].SliceThickness], dtype=np.float32)
+def resample(image, input_shape, scan=False, new_spacing=[1,1,1]):
+      if scan:
+            spacing = np.array([scan[0].SliceThickness], dtype=np.float32)
       
       reslice = input_shape[0]/image.shape[0]
       rescale_height = input_shape[1]/image.shape[1]
