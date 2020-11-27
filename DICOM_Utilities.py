@@ -1,3 +1,6 @@
+import numpy as np
+from scipy.ndimage import interpolation
+
 #load dicom from given path
 def load_dicom(path, input_shape):
       '''Input:
@@ -47,6 +50,6 @@ def resample(image, input_shape, scan=False, new_spacing=[1,1,1]):
       real_resize_factor = new_shape/image.shape
       new_spacing = spacing/real_resize_factor
       
-      image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode="nearest")
+      image = interpolation.zoom(image, real_resize_factor, mode="nearest")
                         
       return image, new_spacing
